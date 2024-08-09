@@ -1,0 +1,5 @@
+[plugin]
+package = "pretix-przelewy24"
+modules = [ "pretix_przelewy24" ]
+marketplace_name = "przelewy24"
+
