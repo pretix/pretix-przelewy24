@@ -1,0 +1,34 @@
+{% load i18n %}
+
+{% if payment_info %}
+    <dl class="dl-horizontal">
+        {% if "orderId" in payment_info %}
+            <dt>{% trans "Order ID" %}</dt>
+            <dd>{{ payment_info.orderId }}</dd>
+        {% endif %}
+        {% if "paymentMethod" in payment_info %}
+            <dt>{% trans "Payment Method" %}</dt>
+            <dd>{{ payment_info.paymentMethod }}</dd>
+        {% endif %}
+        {% if "statement" in payment_info %}
+            <dt>{% trans "Statement descriptor" %}</dt>
+            <dd>{{ payment_info.statement }}</dd>
+        {% endif %}
+        {% if "token" in payment_info %}
+            <dt>{% trans "Token" %}</dt>
+            <dd>{{ payment_info.token }}</dd>
+        {% endif %}
+        {% if "error" in payment_info %}
+            <dt>{% trans "Error" %}</dt>
+            <dd>{{ payment_info.error }}</dd>
+        {% endif %}
+        {% if "check_error" in payment_info %}
+            <dt>{% trans "Error" %}</dt>
+            <dd>{{ payment_info.check_error }}</dd>
+        {% endif %}
+        {% if "verification_error" in payment_info %}
+            <dt>{% trans "Error" %}</dt>
+            <dd>{{ payment_info.verification_error }}</dd>
+        {% endif %}
+    </dl>
+{% endif %}

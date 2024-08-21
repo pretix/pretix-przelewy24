@@ -1,0 +1,18 @@
+{% load i18n %}
+{% load static %}
+
+<p>{% blocktrans trimmed %}
+    After you submitted your order, we will redirect you to our payment provider to complete your payment.
+    You will then be redirected back here to get your tickets.
+{% endblocktrans %}</p>
+<p>{% blocktrans trimmed %}
+    Available payment methods:
+{% endblocktrans %}</p>
+{% if payment_methods %}
+    <ul>
+        {% for m in payment_methods %}
+            <li>{{ m.name }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+<link rel="stylesheet" href="{% static "pretix_przelewy24/style.css" %}">
