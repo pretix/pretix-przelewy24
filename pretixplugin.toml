@@ -2,4 +2,9 @@
 package = "pretix-przelewy24"
 modules = [ "pretix_przelewy24" ]
 marketplace_name = "przelewy24"
+pypi = true
+repository_servers = { origin = "github.com", gitlab = "code.rami.io" }
+tag_targets = [ "origin", "gitlab" ]
+branch_targets = [ "origin/master", "gitlab/master", "f:gitlab/pypi" ]
+
 
