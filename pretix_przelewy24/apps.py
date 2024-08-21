@@ -16,8 +16,11 @@ class PluginApp(PluginConfig):
     class PretixPluginMeta:
         name = gettext_lazy("Przelewy24")
         author = "pretix team"
-        description = gettext_lazy("Accept payments through Przelewy24, a Polish payment facilitator.")
+        description = gettext_lazy(
+            "Accept payments through Przelewy24, a Polish payment facilitator."
+        )
         visible = True
+        picture = "pretix_przelewy24/przelewy24_logo.svg"
         version = __version__
         category = "PAYMENT"
         compatibility = "pretix>=2024.7.0"
