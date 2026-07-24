@@ -268,7 +268,10 @@ class Przelewy24(BasePaymentProvider):
                             99,
                             int((payment.order.expires - now()).total_seconds() // 60),
                         ),
-                        "waitForResult": False,
+                        # Hold the customer on the Przelewy24 page until the
+                        # payment result is known, so that the return redirect
+                        # does not arrive before the transaction status is set.
+                        "waitForResult": True,
                         "regulationAccept": False,
                         "transferLabel": payment.full_id[:20],
                         "encoding": "UTF-8",
