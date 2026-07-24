@@ -100,6 +100,19 @@ class Przelewy24(BasePaymentProvider):
                     widget=I18nTextInput,
                 ),
             ),
+            (
+                "wait_for_result",
+                forms.BooleanField(
+                    label=_("Wait for payment result"),
+                    help_text=_(
+                        "Keep the customer on the Przelewy24 page until the payment result is known before "
+                        "redirecting them back. This avoids a confusing error message when the customer returns "
+                        "before the payment has been registered."
+                    ),
+                    initial=True,
+                    required=False,
+                ),
+            ),
         ]
         d = OrderedDict(fields + list(super().settings_form_fields.items()))
         del d["_invoice_text"]
@@ -268,10 +281,12 @@ class Przelewy24(BasePaymentProvider):
                             99,
                             int((payment.order.expires - now()).total_seconds() // 60),
                         ),
-                        # Hold the customer on the Przelewy24 page until the
-                        # payment result is known, so that the return redirect
-                        # does not arrive before the transaction status is set.
-                        "waitForResult": True,
+                        # Holding the customer on the Przelewy24 page until the
+                        # payment result is known prevents the return redirect
+                        # from arriving before the transaction status is set.
+                        "waitForResult": self.settings.get(
+                            "wait_for_result", as_type=bool, default=True
+                        ),
                         "regulationAccept": False,
                         "transferLabel": payment.full_id[:20],
                         "encoding": "UTF-8",
