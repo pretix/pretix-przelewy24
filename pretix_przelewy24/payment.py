@@ -100,6 +100,19 @@ class Przelewy24(BasePaymentProvider):
                     widget=I18nTextInput,
                 ),
             ),
+            (
+                "wait_for_result",
+                forms.BooleanField(
+                    label=_("Wait for payment result"),
+                    help_text=_(
+                        "Keep the customer on the Przelewy24 page until the payment result is known before "
+                        "redirecting them back. This avoids a confusing error message when the customer returns "
+                        "before the payment has been registered."
+                    ),
+                    initial=True,
+                    required=False,
+                ),
+            ),
         ]
         d = OrderedDict(fields + list(super().settings_form_fields.items()))
         del d["_invoice_text"]
@@ -268,7 +281,12 @@ class Przelewy24(BasePaymentProvider):
                             99,
                             int((payment.order.expires - now()).total_seconds() // 60),
                         ),
-                        "waitForResult": False,
+                        # Holding the customer on the Przelewy24 page until the
+                        # payment result is known prevents the return redirect
+                        # from arriving before the transaction status is set.
+                        "waitForResult": self.settings.get(
+                            "wait_for_result", as_type=bool, default=True
+                        ),
                         "regulationAccept": False,
                         "transferLabel": payment.full_id[:20],
                         "encoding": "UTF-8",
@@ -360,15 +378,22 @@ class Przelewy24(BasePaymentProvider):
                 auth=self._auth,
             )
             r.raise_for_status()
-            payment.fail(
-                info={
-                    **payment.info_data,
-                    **r.json()["data"],
-                }
-            )
+            data = r.json()["data"]
 
-            # Seems like we can't detect a pending payment properly :(
-            if r.json()["data"]["status"] != 1:
+            payment.info_data = {
+                **payment.info_data,
+                **data,
+            }
+            payment.save(update_fields=["info"])
+
+            # 1 = paid (awaiting verification), 2 = verified
+            if data["status"] in (1, 2):
+                if payment.state != OrderPayment.PAYMENT_STATE_CONFIRMED:
+                    self._verify_transaction(payment)
+            else:
+                # Do not fail the payment: the server-to-server callback may
+                # still confirm it. Just inform the customer that no payment
+                # was found.
                 raise PaymentException(_("No successful payment was detected."))
         except (requests.RequestException, ValueError) as e:
             payment.info_data = {
